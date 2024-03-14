@@ -6,7 +6,7 @@ put melons in a shopping cart.
 Authors: Joel Burton, Christian Fernandez, Meggie Mahnken, Katie Byers.
 """
 
-from flask import Flask, render_template, redirect, flash
+from flask import Flask, render_template, redirect, flash, session
 import jinja2
 
 import melons
@@ -50,7 +50,7 @@ def show_melon(melon_id):
     Show all info about a melon. Also, provide a button to buy that melon.
     """
 
-    melon = melons.get_by_id("meli")
+    melon = melons.get_by_id(melon_id)
     print(melon)
     return render_template("melon_details.html",
                            display_melon=melon)
@@ -74,8 +74,15 @@ def add_to_cart(melon_id):
     # - increment the count for that melon id by 1
     # - flash a success message
     # - redirect the user to the cart page
+    if session.get("cart") is None:
+        session["cart"] = {}
 
-    return "Oops! This needs to be implemented!"
+    session["cart"][melon_id] = session["cart"].get(melon_id, 0) + 1
+    
+    flash(f"{melons.get_by_id(melon_id).common_name} was added to the cart!")
+    session.modified == True
+    
+    return redirect("/cart")
 
 
 @app.route("/cart")
@@ -100,7 +107,23 @@ def show_shopping_cart():
     # Make sure your function can also handle the case wherein no cart has
     # been added to the session
 
-    return render_template("cart.html")
+    shopping_cart = session["cart"]
+    
+    active_cart = {}
+    running_total = 0
+    #print(shopping_cart.keys())
+    
+    for melon_id in shopping_cart.keys():
+        #print(melon_id)
+        active_cart[melon_id] = {}
+        active_cart[melon_id]["name"] = melons.get_by_id(melon_id).common_name
+        active_cart[melon_id]["quantity"] = shopping_cart[melon_id]
+        active_cart[melon_id]["melon_price"] = melons.get_by_id(melon_id).price
+        active_cart[melon_id]["total"] = shopping_cart[melon_id] * melons.get_by_id(melon_id).price
+
+        running_total = running_total + (shopping_cart[melon_id] * melons.get_by_id(melon_id).price)
+    
+    return render_template("cart.html", active_cart=active_cart, running_total=running_total)
 
 
 @app.route("/login", methods=["GET"])
