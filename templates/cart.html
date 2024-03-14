@@ -14,15 +14,17 @@
         </thead>
         <tbody>
             {% for melon in active_cart.values() %}
-                <td>{{ melon["name"] }}</td>
-                <td>{{ melon["quantity"] }} </td>
-                <td>{{ melon["melon_price"] }}</td>
-                <td>{{ melon["total"] }} </td>
+                <tr>
+                    <td>{{ melon["name"] }}</td>
+                    <td>{{ melon["quantity"] }} </td>
+                    <td>{{ "$%.2f"|format(melon["melon_price"]) }}</td>
+                    <td>{{ "$%0.2f"|format(melon["total"]) }} </td>
+                </tr>
             {% endfor %}
         </tbody>
     </table>
 
-    <h3>Total: {{ running_total }}</h3>
+    <h3>Total: {{ "$%0.2f"|format(running_total) }}</h3>
 
     <a href="/checkout" class="btn btn-large btn-primary">Check Out</a>
 
